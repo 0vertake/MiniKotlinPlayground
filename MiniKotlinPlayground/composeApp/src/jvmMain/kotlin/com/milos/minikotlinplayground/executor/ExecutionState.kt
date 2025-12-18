@@ -1,4 +1,4 @@
-package com.milos.minikotlinplayground
+package com.milos.minikotlinplayground.executor
 
 data class ExecutionState(
     val scriptContent: String = "",
