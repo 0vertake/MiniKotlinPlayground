@@ -32,24 +32,31 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.milos.minikotlinplayground.executor.ExecutionResult
 import com.milos.minikotlinplayground.executor.ScriptExecutor
+import com.milos.minikotlinplayground.executor.ExecutionState
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import minikotlinplayground.composeapp.generated.resources.Res
 import minikotlinplayground.composeapp.generated.resources.kotlin_icon
 
-
-
 @Composable
 @Preview
 fun App() {
     val executor = remember { ScriptExecutor() }
     val scope = rememberCoroutineScope()
-    var isRunning by remember { mutableStateOf(false) }
-    var exitCode by remember { mutableStateOf<Int?>(null) }
 
-    var scriptText by remember { mutableStateOf("println(\"Hello, Kotlin!\")") }
-    var outputText by remember { mutableStateOf("Output will appear here...") }
+    var state by remember {
+        mutableStateOf(
+            ExecutionState(
+                scriptContent = "for (i in 1..5) {\n" +
+                        "    println(\"Count \$i.\")\n" +
+                        "}",
+                output = "Output will appear here...",
+                isRunning = false,
+                exitCode = null
+            )
+        )
+    }
 
     val colors = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
@@ -101,22 +108,24 @@ fun App() {
                         }
                         Button(
                             onClick = {
-                                isRunning = true
-                                outputText = ""
-                                exitCode = null
+                                state = state.copy(isRunning = true, output = "", exitCode = null)
                                 scope.launch {
-                                    executor.executeScript(scriptText).collect { result ->
+                                    executor.executeScript(state.scriptContent).collect { result ->
                                         when (result) {
-                                            is ExecutionResult.Output -> outputText += result.line + "\n"
-                                            is ExecutionResult.Error -> outputText += "ERROR: ${result.message}\n"
+                                            is ExecutionResult.Output -> {
+                                                state = state.copy(output = state.output + result.line + "\n")
+                                            }
+                                            is ExecutionResult.Error -> {
+                                                state = state.copy(output = state.output + "ERROR: ${result.message}\n")
+                                            }
                                             is ExecutionResult.Finished -> {
-                                                exitCode = result.exitCode
-                                                isRunning = false
+                                                state = state.copy(exitCode = result.exitCode, isRunning = false)
                                             }
                                         }
                                     }
                                 }
                             },
+                            enabled = !state.isRunning,
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = colors.primary,
                                 contentColor = colors.onPrimary
@@ -136,8 +145,8 @@ fun App() {
                         )
                     ) {
                         TextField(
-                            value = scriptText,
-                            onValueChange = { scriptText = it },
+                            value = state.scriptContent,
+                            onValueChange = { state = state.copy(scriptContent = it) },
                             modifier = Modifier.fillMaxSize(),
                             colors = TextFieldDefaults.colors(
                                 focusedContainerColor = colors.surface,
@@ -192,7 +201,7 @@ fun App() {
                         )
                     ) {
                         TextField(
-                            value = outputText,
+                            value = state.output,
                             onValueChange = {},
                             readOnly = true,
                             modifier = Modifier.fillMaxSize(),
