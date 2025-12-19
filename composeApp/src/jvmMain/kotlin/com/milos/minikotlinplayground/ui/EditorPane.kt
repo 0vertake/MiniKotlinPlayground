@@ -1,6 +1,7 @@
 package com.milos.minikotlinplayground.ui
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.ui.graphics.SolidColor
@@ -18,6 +19,9 @@ import com.milos.minikotlinplayground.syntax.SyntaxHighlighter
 import minikotlinplayground.composeapp.generated.resources.Res
 import minikotlinplayground.composeapp.generated.resources.kotlin_icon
 import org.jetbrains.compose.resources.painterResource
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.rememberScrollbarAdapter
 
 @Composable
 fun EditorPane(
@@ -32,6 +36,7 @@ fun EditorPane(
     val typography = MaterialTheme.typography
     val highlighter = SyntaxHighlighter()
     val focusRequester = remember { FocusRequester() }
+    val scrollState = rememberScrollState()
 
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
@@ -98,31 +103,42 @@ fun EditorPane(
                     containerColor = colors.surface
                 )
             ) {
-                BasicTextField(
-                    value = scriptContent,
-                    onValueChange = onScriptChange,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp)
-                        .focusRequester(focusRequester),
-                    textStyle = typography.bodyMedium.copy(
-                        fontFamily = FontFamily.Monospace,
-                        color = Color.Transparent
-                    ),
-                    cursorBrush = SolidColor(colors.primary),
-                    decorationBox = { innerTextField ->
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            Text(
-                                text = highlighter.highlight(scriptContent.text),
-                                style = typography.bodyMedium.copy(fontFamily = FontFamily.Monospace)
-                            )
+                Box(modifier = Modifier.fillMaxSize()) {
+                    BasicTextField(
+                        value = scriptContent,
+                        onValueChange = onScriptChange,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(scrollState)
+                            .padding(16.dp)
+                            .focusRequester(focusRequester),
+                        textStyle = typography.bodyMedium.copy(
+                            fontFamily = FontFamily.Monospace,
+                            color = Color.Transparent
+                        ),
+                        cursorBrush = SolidColor(colors.primary),
+                        decorationBox = { innerTextField ->
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                Text(
+                                    text = highlighter.highlight(scriptContent.text),
+                                    style = typography.bodyMedium.copy(fontFamily = FontFamily.Monospace)
+                                )
 
-                            Box {
-                                innerTextField()
+                                Box {
+                                    innerTextField()
+                                }
                             }
                         }
-                    }
-                )
+                    )
+
+                    VerticalScrollbar(
+                        adapter = rememberScrollbarAdapter(scrollState),
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .fillMaxHeight()
+                            .padding(end = 4.dp)
+                    )
+                }
             }
         }
     }
