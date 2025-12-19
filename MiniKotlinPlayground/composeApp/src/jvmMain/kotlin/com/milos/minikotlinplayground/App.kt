@@ -24,10 +24,11 @@ fun App() {
     var state by remember {
         mutableStateOf(
             ExecutionState(
-                scriptContent = "for (i in 1..5) {\n" +
-                        "    println(\"Count \$i.\")\n" +
+                scriptContent = "import java.lang.Thread.sleep\n" +
+                        "for (i in 1..5) {\n" +
+                        "    sleep(1000)\n" +
+                        $$"    println(\"App is running... $i\")\n" +
                         "}",
-                output = "Output will appear here...",
                 isRunning = false,
                 exitCode = null
             )
@@ -55,15 +56,17 @@ fun App() {
                         state = state.copy(isRunning = true, output = "", exitCode = null)
                         scope.launch {
                             executor.executeScript(state.scriptContent).collect { result ->
-                                when (result) {
+                                state = when (result) {
                                     is ExecutionResult.Output -> {
-                                        state = state.copy(output = state.output + result.line + "\n")
+                                        state.copy(output = state.output + result.line + "\n")
                                     }
+
                                     is ExecutionResult.Error -> {
-                                        state = state.copy(output = state.output + "ERROR: ${result.message}\n")
+                                        state.copy(output = state.output + "ERROR: ${result.message}\n")
                                     }
+
                                     is ExecutionResult.Finished -> {
-                                        state = state.copy(exitCode = result.exitCode, isRunning = false)
+                                        state.copy(exitCode = result.exitCode, isRunning = false)
                                     }
                                 }
                             }
