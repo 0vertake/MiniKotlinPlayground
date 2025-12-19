@@ -1,10 +1,17 @@
 package com.milos.minikotlinplayground.ui
 
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
@@ -25,6 +32,8 @@ fun OutputPane(
 ) {
     val colors = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
+    val lazyListState = rememberLazyListState()
+    val lines = remember(output) { output.lines() }
 
     Card(
         modifier = modifier,
@@ -54,18 +63,34 @@ fun OutputPane(
                     containerColor = colors.surface
                 )
             ) {
-                val annotatedOutput = parseAndAnnotateErrors(output, colors.primary, onErrorLocationClick)
+                Box(modifier = Modifier.fillMaxSize()) {
+                    LazyColumn(
+                        state = lazyListState,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        items(lines) { line ->
+                            val annotatedLine = parseAndAnnotateErrors(line, colors.primary, onErrorLocationClick)
+                            BasicText(
+                                text = annotatedLine,
+                                style = typography.bodyMedium.copy(
+                                    fontFamily = FontFamily.Monospace,
+                                    color = colors.onSurface
+                                )
+                            )
+                        }
+                    }
 
-                BasicText(
-                    text = annotatedOutput,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    style = typography.bodyMedium.copy(
-                        fontFamily = FontFamily.Monospace,
-                        color = colors.onSurface
+                    VerticalScrollbar(
+                        adapter = rememberScrollbarAdapter(lazyListState),
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .fillMaxHeight()
+                            .padding(end = 4.dp)
                     )
-                )
+                }
             }
         }
     }
