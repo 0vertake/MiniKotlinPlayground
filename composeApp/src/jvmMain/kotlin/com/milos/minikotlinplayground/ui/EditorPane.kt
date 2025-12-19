@@ -5,11 +5,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.milos.minikotlinplayground.syntax.SyntaxHighlighter
 import minikotlinplayground.composeapp.generated.resources.Res
@@ -18,15 +21,27 @@ import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun EditorPane(
-    scriptContent: String,
+    scriptContent: TextFieldValue,
     isRunning: Boolean,
-    onScriptChange: (String) -> Unit,
+    onScriptChange: (TextFieldValue) -> Unit,
     onRunClick: () -> Unit,
+    errorClickTrigger: Int = 0,
     modifier: Modifier = Modifier
 ) {
     val colors = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
     val highlighter = SyntaxHighlighter()
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+
+    LaunchedEffect(errorClickTrigger) {
+        if (errorClickTrigger > 0) {
+            focusRequester.requestFocus()
+        }
+    }
 
     Card(
         modifier = modifier,
@@ -88,7 +103,8 @@ fun EditorPane(
                     onValueChange = onScriptChange,
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(16.dp),
+                        .padding(16.dp)
+                        .focusRequester(focusRequester),
                     textStyle = typography.bodyMedium.copy(
                         fontFamily = FontFamily.Monospace,
                         color = Color.Transparent
@@ -97,7 +113,7 @@ fun EditorPane(
                     decorationBox = { innerTextField ->
                         Box(modifier = Modifier.fillMaxSize()) {
                             Text(
-                                text = highlighter.highlight(scriptContent),
+                                text = highlighter.highlight(scriptContent.text),
                                 style = typography.bodyMedium.copy(fontFamily = FontFamily.Monospace)
                             )
 
