@@ -2,6 +2,8 @@ package com.milos.minikotlinplayground.ui
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -9,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import com.milos.minikotlinplayground.syntax.SyntaxHighlighter
 import minikotlinplayground.composeapp.generated.resources.Res
 import minikotlinplayground.composeapp.generated.resources.kotlin_icon
 import org.jetbrains.compose.resources.painterResource
@@ -23,6 +26,7 @@ fun EditorPane(
 ) {
     val colors = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
+    val highlighter = SyntaxHighlighter()
 
     Card(
         modifier = modifier,
@@ -79,21 +83,29 @@ fun EditorPane(
                     containerColor = colors.surface
                 )
             ) {
-                TextField(
+                BasicTextField(
                     value = scriptContent,
                     onValueChange = onScriptChange,
-                    modifier = Modifier.fillMaxSize(),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = colors.surface,
-                        unfocusedContainerColor = colors.surface,
-                        focusedTextColor = colors.onSurface,
-                        unfocusedTextColor = colors.onSurface,
-                        cursorColor = colors.primary,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    textStyle = typography.bodyMedium.copy(
+                        fontFamily = FontFamily.Monospace,
+                        color = Color.Transparent
                     ),
-                    textStyle = typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
-                    singleLine = false
+                    cursorBrush = SolidColor(colors.primary),
+                    decorationBox = { innerTextField ->
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            Text(
+                                text = highlighter.highlight(scriptContent),
+                                style = typography.bodyMedium.copy(fontFamily = FontFamily.Monospace)
+                            )
+
+                            Box {
+                                innerTextField()
+                            }
+                        }
+                    }
                 )
             }
         }
