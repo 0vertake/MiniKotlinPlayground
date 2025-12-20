@@ -1,27 +1,62 @@
-This is a Kotlin Multiplatform project targeting Desktop (JVM).
+## Prerequisites
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-    folder is the appropriate location.
+### 1. JVM (Temurin 24 or compatible JDK 24)
 
-### Build and Run Desktop (JVM) Application
+If you have IntelliJ IDEA installed, you likely already have a JDK. Verify by running:
+```shell
+java -version
+```
 
-To build and run the development version of the desktop app, use the run configuration from the run widget
-in your IDE’s toolbar or run it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:run
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:run
-  ```
+If you need to install JDK 24, download Temurin 24 from [Adoptium](https://adoptium.net/temurin/releases/?version=24).
 
----
+### 2. Install Kotlin Compiler
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+**Windows:**
+1. Download the latest Kotlin compiler from [GitHub Releases](https://github.com/JetBrains/kotlin/releases/latest)
+2. Extract the ZIP to a location (e.g., `C:\kotlinc`)
+3. Add `C:\kotlinc\bin` to your PATH:
+   - Search for "Environment Variables" in Windows
+   - Edit "Path" under System Variables
+   - Add new entry: `C:\kotlinc\bin`
+4. Verify installation:
+   ```shell
+   kotlinc -version
+   ```
+
+**macOS:**
+```shell
+brew install kotlin
+```
+
+**Linux:**
+```shell
+# Using SDKMAN (recommended)
+curl -s "https://get.sdkman.io" | bash
+source "$HOME/.sdkman/bin/sdkman-init.sh"
+sdk install kotlin
+
+# Or download manually
+wget https://github.com/JetBrains/kotlin/releases/latest/download/kotlin-compiler.zip
+unzip kotlin-compiler.zip
+sudo mv kotlinc /usr/local/
+echo 'export PATH=$PATH:/usr/local/kotlinc/bin' >> ~/.bashrc
+source ~/.bashrc
+```
+
+Verify installation:
+```shell
+kotlinc -version
+```
+
+## Running the Application
+
+### Windows
+```shell
+.\gradlew.bat :composeApp:run
+```
+
+### macOS/Linux
+```shell
+./gradlew :composeApp:run
+```
+
