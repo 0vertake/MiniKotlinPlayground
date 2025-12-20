@@ -1,11 +1,14 @@
 package com.milos.minikotlinplayground
 
 import com.milos.minikotlinplayground.executor.ExecutionState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -42,12 +45,26 @@ fun App() {
         )
     }
 
+    val kotlinGradient = Brush.verticalGradient(
+        colors = listOf(
+            Color(0xFF7F52FF).copy(alpha = 0.8f),
+            Color(0xFFE1306C).copy(alpha = 0.7f)
+        )
+    )
+
     MaterialTheme {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(kotlinGradient)
                 .safeContentPadding()
         ) {
+            StatusBar(
+                isRunning = state.isRunning,
+                exitCode = state.exitCode,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
+            )
+
             Row(
                 modifier = Modifier
                     .weight(1f)
@@ -103,11 +120,6 @@ fun App() {
                     }
                 )
             }
-
-            StatusBar(
-                isRunning = state.isRunning,
-                exitCode = state.exitCode
-            )
         }
     }
 }
